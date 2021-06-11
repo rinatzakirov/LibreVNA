@@ -175,6 +175,7 @@ std::set<TraceXYPlot::YAxisType> XYplotAxisDialog::supportedYAxis(TraceXYPlot::X
         ret.insert(TraceXYPlot::YAxisType::Magnitude);
         ret.insert(TraceXYPlot::YAxisType::Phase);
         ret.insert(TraceXYPlot::YAxisType::VSWR);
+        ret.insert(TraceXYPlot::YAxisType::Real);
         break;
     case TraceXYPlot::XAxisType::Time:
     case TraceXYPlot::XAxisType::Distance:

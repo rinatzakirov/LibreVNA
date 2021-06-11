@@ -1,3 +1,4 @@
+#include <complex>
 #include "expression.h"
 #include <QWidget>
 #include "ui_expressiondialog.h"
@@ -13,6 +14,7 @@ Math::Expression::Expression()
 {
     parser = new ParserX(pckCOMMON | pckUNIT | pckCOMPLEX);
     parser->DefineVar("x", Variable(&x));
+    parser->DefineVar("z", Variable(&z));
     expressionChanged();
 }
 
@@ -69,17 +71,50 @@ void Math::Expression::fromJSON(nlohmann::json j)
     expressionChanged();
 }
 
+//Normalize to [-180,180):
+inline double constrainAngle(double x){
+    x = fmod(x + M_PI, M_PI * 2);
+    if (x < 0)
+        x += M_PI * 2;
+    return x - M_PI;
+}
+// convert to [-360,360]
+inline double angleConv(double angle){
+    return fmod(constrainAngle(angle), M_PI * 2);
+}
+inline double angleDiff(double a,double b){
+    double dif = fmod(b - a + M_PI, M_PI * 2);
+    if (dif < 0)
+        dif += M_PI * 2;
+    return dif - M_PI;
+}
+inline double unwrap(double previousAngle,double newAngle){
+    return previousAngle - angleDiff(newAngle,angleConv(previousAngle));
+}
+
 void Math::Expression::inputSamplesChanged(unsigned int begin, unsigned int end)
 {
     auto in = input->rData();
     data.resize(in.size());
     try {
+        double lastAng;
         for(unsigned int i=begin;i<end;i++) {
             t = in[i].x;
             f = in[i].x;
             w = in[i].x * 2 * M_PI;
             d = root()->timeToDistance(t);
             x = in[i].y;
+
+            double Z0 = 50;
+	        double MAG = abs(complex<double>(x));
+            double ANG = arg(complex<double>(x)) * 180 / M_PI;
+            if(i == begin) lastAng = ANG;
+            ANG = unwrap(lastAng, ANG);
+            const double real = (Z0*(1-(MAG*MAG)))/(1+(MAG*MAG)-(2*MAG*cos((ANG / 360)*2*M_PI)));
+            const double imag = (2*MAG*sin((ANG / 360)*2*M_PI)*Z0)/(1+(MAG*MAG)-(2*MAG*cos((ANG / 360)*2*M_PI)));
+            z = real + imag * 1.0i;
+            lastAng = ANG;
+
             Value res = parser->Eval();
             data[i].x = in[i].x;
             data[i].y = res.GetComplex();

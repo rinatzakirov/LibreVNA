@@ -19,6 +19,7 @@ const set<TraceXYPlot::YAxisType> TraceXYPlot::YAxisTypes = {TraceXYPlot::YAxisT
                                            TraceXYPlot::YAxisType::Magnitude,
                                            TraceXYPlot::YAxisType::Phase,
                                            TraceXYPlot::YAxisType::VSWR,
+                                           TraceXYPlot::YAxisType::Real,
                                            TraceXYPlot::YAxisType::ImpulseReal,
                                            TraceXYPlot::YAxisType::ImpulseMag,
                                            TraceXYPlot::YAxisType::Step,
@@ -768,6 +769,7 @@ QString TraceXYPlot::AxisTypeToName(TraceXYPlot::YAxisType type)
     case YAxisType::Phase: return "Phase"; break;
     case YAxisType::VSWR: return "VSWR"; break;
     case YAxisType::ImpulseReal: return "Impulse Response (Real)"; break;
+    case YAxisType::Real: return "Custom (Real)"; break;
     case YAxisType::ImpulseMag: return "Impulse Response (Magnitude)"; break;
     case YAxisType::Step: return "Step Response"; break;
     case YAxisType::Impedance: return "Impedance"; break;
@@ -873,6 +875,7 @@ QPointF TraceXYPlot::traceToCoordinate(Trace *t, unsigned int sample, TraceXYPlo
             ret.setY((1+abs(data.y)) / (1-abs(data.y)));
         }
         break;
+    case YAxisType::Real:
     case YAxisType::ImpulseReal:
         ret.setY(real(data.y));
         break;
@@ -1038,6 +1041,7 @@ QString TraceXYPlot::AxisUnit(TraceXYPlot::YAxisType type)
     case TraceXYPlot::YAxisType::Phase: return "°"; break;
     case TraceXYPlot::YAxisType::VSWR: return ""; break;
     case TraceXYPlot::YAxisType::ImpulseReal: return ""; break;
+    case TraceXYPlot::YAxisType::Real: return ""; break;
     case TraceXYPlot::YAxisType::ImpulseMag: return "db"; break;
     case TraceXYPlot::YAxisType::Step: return ""; break;
     case TraceXYPlot::YAxisType::Impedance: return "Ohm"; break;
